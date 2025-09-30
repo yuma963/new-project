@@ -104,7 +104,7 @@ void draw() {
     // 敵弾がプレイヤーに当たる
     if (!b.fromPlayer && dist(b.x, b.y, player.x, player.y) < 30) {
       player.hp--;
-      bullets.remove(i);
+      bullets.remove(i);//a
       if (player.hp <= 0) {
         gameOver = true;
         win = false;
