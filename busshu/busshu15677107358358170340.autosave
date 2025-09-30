@@ -6,6 +6,8 @@ int maxSelect = 3;
 
 void setup() {
 	size(800, 600);
+  PFont font = createFont("Meiryo", 50);
+  textFont(font);
 }
 
 void draw() {
@@ -74,4 +76,3 @@ void mousePressed() {
 		}
 	}
 }
-
