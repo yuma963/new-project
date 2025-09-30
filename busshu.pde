@@ -141,4 +141,7 @@ void keyPressed() {
   if (key == 'Z' || key == 'z') {
     mojiIndex = (mojiIndex+1) % mojis.length;
   }
+  if (key == 'X' || key == 'x') {
+    mojiIndex = (mojiIndex-1+mojis.length) % mojis.length;
+  }
 }
