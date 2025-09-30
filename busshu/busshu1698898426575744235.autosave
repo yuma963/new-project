@@ -145,13 +145,18 @@ void drawStickMan(float x, float y, boolean attack, float anim, boolean walking,
 		elbowAngleR = radians(0);
 		armAngleL = radians(-120);
 		elbowAngleL = radians(0);
+	} else if (walking) {
+		float swing = sin(anim)*50;
+		armAngleR = radians(-30 + swing);
+		elbowAngleR = radians(30 + cos(anim)*30);
+		armAngleL = radians(-150 - swing);
+		elbowAngleL = radians(30 - cos(anim)*30);
 	} else {
-		// 停止時も歩行（走行）ポーズ（右腕をお腹の位置まで下げる）
-		float swing = sin(anim)*28;
-		armAngleR = radians(-1 + swing); // -50→-80で右腕をより下げる
-		elbowAngleR = radians(40 + cos(anim)*10); // 18→40で肘を曲げて前に
-		armAngleL = radians(-200 - swing);
-		elbowAngleL = radians(18 - cos(anim)*18);
+		// 仁王立ち（腕を真下に自然に下げる）
+		armAngleR = radians(-200);
+		elbowAngleR = radians(60);
+		armAngleL = radians(30);
+		elbowAngleL = radians(-60);
 	}
 	// 右腕
 	float exR = upperArmLen*cos(armAngleR);
@@ -177,13 +182,18 @@ void drawStickMan(float x, float y, boolean attack, float anim, boolean walking,
 		kneeAngleR = radians(0);
 		legAngleL = radians(90);
 		kneeAngleL = radians(0);
-	} else {
-		// 停止時も歩行（走行）ポーズ
+	} else if (walking) {
 		float swing = sin(anim)*40;
 		legAngleR = radians(90 + swing);
 		kneeAngleR = radians(30 + cos(anim)*30);
 		legAngleL = radians(90 - swing);
 		kneeAngleL = radians(30 - cos(anim)*30);
+	} else {
+		// 仁王立ち（足をまっすぐ）
+		legAngleR = radians(90);
+		kneeAngleR = radians(0);
+		legAngleL = radians(90);
+		kneeAngleL = radians(0);
 	}
 	// 右足
 	float kxR = upperLegLen*cos(legAngleR);
