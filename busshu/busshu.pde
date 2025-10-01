@@ -5,6 +5,8 @@ boolean[] weaponSelected = {false, false, false, false, false};
 
 int maxSelect = 3;
 boolean battleStarted = false;
+int[] selectedWeaponIdx = {-1, -1, -1}; // 選択した武器のインデックス
+int currentWeapon = 0; // 0,1,2で切り替え
 
 // 棒人間キャラクターの状態
 float playerX = 200;
@@ -115,11 +117,15 @@ void drawBattleScreen() {
 		}
 	}
 
-	// 棒人間描画
-	drawStickMan(playerX, playerY, attacking, walkAnim, walking, !onGround);
+	// 武器文字（選択した3つからcurrentWeaponで切り替え）
+	String weaponStr = "";
+	if (selectedWeaponIdx[currentWeapon] != -1) {
+		weaponStr = weaponCandidates[selectedWeaponIdx[currentWeapon]];
+	}
+	drawStickMan(playerX, playerY, attacking, walkAnim, walking, !onGround, weaponStr);
 }
 
-void drawStickMan(float x, float y, boolean attack, float anim, boolean walking, boolean jumping) {
+void drawStickMan(float x, float y, boolean attack, float anim, boolean walking, boolean jumping, String weaponStr) {
 	pushMatrix();
 	translate(x, y);
 	stroke(0);
@@ -232,6 +238,17 @@ void mousePressed() {
 				}
 			}
 		}
+		// 選択した武器インデックスを更新
+		int selectedCount2 = 0;
+		for (int i=0; i<weaponSelected.length; i++) {
+			if (weaponSelected[i]) {
+				if (selectedCount2 < 3) selectedWeaponIdx[selectedCount2] = i;
+				selectedCount2++;
+			}
+		}
+		for (int i=selectedCount2; i<3; i++) selectedWeaponIdx[i] = -1;
+		// 武器選択が変わったらcurrentWeaponを0にリセット
+		currentWeapon = 0;
 		// 決定ボタン判定
 		int btnW = 220;
 		int btnH = 60;
@@ -246,6 +263,8 @@ void mousePressed() {
 	}
 }
 
+}
+
 void keyPressed() {
 	if (battleStarted) {
 		// 左右移動
@@ -254,6 +273,10 @@ void keyPressed() {
 		} else if (key == 'D' || key == 'd') {
 			playerVX = 6;
 		}
+		// 武器切り替え
+		if (key == '1') currentWeapon = 0;
+		if (key == '2') currentWeapon = 1;
+		if (key == '3') currentWeapon = 2;
 		// ジャンプ
 		if ((key == ' ' || keyCode == 32) && onGround) {
 			playerVY = -18;
@@ -265,7 +288,8 @@ void keyPressed() {
 			attackFrame = 0;
 		}
 	}
-}
+
+
 
 void keyReleased() {
 	if (battleStarted) {
