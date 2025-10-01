@@ -1,9 +1,37 @@
+// ボール攻撃用
+class Ball {
+  float x, y, vx, vy;
+  int timer;
+  Ball(float x_, float y_, float vx_, float vy_) {
+    x = x_;
+    y = y_;
+    vx = vx_;
+    vy = vy_;
+    timer = 60; // 1秒ほど表示
+  }
+  void update() {
+    x += vx;
+    y += vy;
+    vy += 0.5; // 重力
+    timer--;
+  }
+  void draw() {
+    fill(80,180,255);
+    stroke(30,100,200);
+    strokeWeight(3);
+    ellipse(x, y, 24, 24);
+  }
+  boolean isDead() { return timer <= 0; }
+}
+
+ArrayList<Ball> balls = new ArrayList<Ball>();
+  // ボール攻撃の更新・描画
+
 
 // 武器候補（例：部首・アルファベット・数字）
 String[] weaponCandidates = {"氵", "A", "7", "木", "卩"};
 String[] weaponTypes = {"投擲（ボール）", "火炎放射", "魔法（杖）", "刺突（槍）", "打撃（ハンマー）"};
-  // 現在の武器属性を取得
-  String weaponType = "";
+String weaponType = "";
 
 boolean[] weaponSelected = {false, false, false, false, false};
 
@@ -22,6 +50,7 @@ boolean attacking = false;
 int attackFrame = 0;
 float walkAnim = 0;
 boolean walking = false;
+boolean jumping=false;
 
 void setup() {
   size(800, 600);
@@ -31,13 +60,15 @@ void setup() {
 
 void draw() {
   background(240);
+  if (selectedWeaponIdx[currentWeapon] != -1) {
+    weaponType = weaponTypes[selectedWeaponIdx[currentWeapon]];
+  } else {
+    weaponType = "";
+  }
   if (!battleStarted) {
     drawWeaponSelectScreen();
   } else {
     drawBattleScreen();
-  }
-    if (selectedWeaponIdx[currentWeapon] != -1) {
-    weaponType = weaponTypes[selectedWeaponIdx[currentWeapon]];
   }
 }
 
@@ -137,6 +168,13 @@ void drawBattleScreen() {
   textAlign(LEFT, TOP);
   if (weaponStr.length() > 0) {
     text("属性: " + weaponType, 20, 20);
+  }
+
+  // ボール攻撃の更新・描画
+  for (int i = balls.size() - 1; i >= 0; i--) {
+    balls.get(i).update();
+    balls.get(i).draw();
+    if (balls.get(i).isDead()) balls.remove(i);
   }
 }
 
@@ -318,6 +356,33 @@ void keyPressed() {
     if (keyCode == ENTER || key == '\n') {
       attacking = true;
       attackFrame = 0;
+      // 「氵」ならボールを投げる
+      if (selectedWeaponIdx[currentWeapon] != -1 && weaponCandidates[selectedWeaponIdx[currentWeapon]].equals("氵")) {
+        // 右手の先の座標を計算
+        float upperArmLen = 22;
+        float lowerArmLen = 18;
+        float armAngleR, elbowAngleR;
+        if (jumping) {
+          armAngleR = radians(-60);
+          elbowAngleR = radians(0);
+        } else if (attacking) {
+          armAngleR = radians(-10);
+          elbowAngleR = radians(10);
+        } else {
+          float swing = sin(walkAnim)*28;
+          armAngleR = radians(-1 + swing);
+          elbowAngleR = radians(40 + cos(walkAnim)*10);
+        }
+        float exR = playerX + upperArmLen*cos(armAngleR);
+        float eyR = playerY + upperArmLen*sin(armAngleR);
+        float hxR = exR + lowerArmLen*cos(armAngleR+elbowAngleR);
+        float hyR = eyR + lowerArmLen*sin(armAngleR+elbowAngleR);
+        // 投げる方向（右向き）
+        float speed = 12;
+        float vx = speed * cos(armAngleR+elbowAngleR);
+        float vy = speed * sin(armAngleR+elbowAngleR);
+        balls.add(new Ball(hxR, hyR, vx, vy));
+      }
     }
   }
 }
