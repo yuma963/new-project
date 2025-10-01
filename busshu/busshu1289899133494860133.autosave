@@ -4,7 +4,9 @@ String[] weaponCandidates = {"氵", "A", "7", "木", "卩"};
 String[] weaponTypes = {"投擲（ボール）", "火炎放射", "魔法（杖）", "刺突（槍）", "打撃（ハンマー）"};
   // 現在の武器属性を取得
   String weaponType = "";
-
+  //if (selectedWeaponIdx[currentWeapon] != -1) {
+  //  weaponType = weaponTypes[selectedWeaponIdx[currentWeapon]];
+  //}
 boolean[] weaponSelected = {false, false, false, false, false};
 
 int maxSelect = 3;
@@ -27,6 +29,9 @@ void setup() {
   size(800, 600);
   PFont font = createFont("Meiryo", 50);
   textFont(font);
+    if (selectedWeaponIdx[currentWeapon] != -1) {
+    weaponType = weaponTypes[selectedWeaponIdx[currentWeapon]];
+  }
 }
 
 void draw() {
