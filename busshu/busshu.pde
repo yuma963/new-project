@@ -13,6 +13,16 @@ class Ball {
     x += vx;
     y += vy;
     vy += 0.5; // 重力
+    // 地面でバウンド
+    if (y >= 500) {
+      y = 500;
+      if (abs(vy) > 1) {
+        vy *= -0.6; // 反発＆減衰
+      } else {
+        vy = 0;
+        vx *= 0.8; // 地面で徐々に止まる
+      }
+    }
     timer--;
   }
   void draw() {
@@ -119,6 +129,10 @@ void drawWeaponSelectScreen() {
   text("決定する！", width/2, btnY+btnH/2);
 }
 
+boolean beamActive = false;
+int beamFrame = 0;
+float beamStartX = 0, beamStartY = 0, beamAngle = 0;
+
 void drawBattleScreen() {
   background(200,220,255);
   // 地面
@@ -161,6 +175,21 @@ void drawBattleScreen() {
     weaponStr = weaponCandidates[selectedWeaponIdx[currentWeapon]];
   }
   drawStickMan(playerX, playerY, attacking, walkAnim, walking, !onGround, weaponStr);
+
+  // 7ビームの描画
+  if (beamActive) {
+    pushStyle();
+    stroke(255, 230, 40);
+    strokeWeight(16);
+    float bx = beamStartX;
+    float by = beamStartY;
+    float ex = bx + cos(beamAngle) * (width - bx);
+    float ey = by + sin(beamAngle) * (width - bx);
+    line(bx, by, ex, ey);
+    popStyle();
+    beamFrame++;
+    if (beamFrame > 6) beamActive = false;
+  }
 
   // デバッグ用：現在の武器属性を画面左上に表示
   fill(30);
@@ -356,32 +385,39 @@ void keyPressed() {
     if (keyCode == ENTER || key == '\n') {
       attacking = true;
       attackFrame = 0;
+      // 右手の先の座標を計算
+      float upperArmLen = 22;
+      float lowerArmLen = 18;
+      float armAngleR, elbowAngleR;
+      if (jumping) {
+        armAngleR = radians(-60);
+        elbowAngleR = radians(0);
+      } else if (attacking) {
+        armAngleR = radians(-10);
+        elbowAngleR = radians(10);
+      } else {
+        float swing = sin(walkAnim)*28;
+        armAngleR = radians(-1 + swing);
+        elbowAngleR = radians(40 + cos(walkAnim)*10);
+      }
+      float exR = playerX + upperArmLen*cos(armAngleR);
+      float eyR = playerY + upperArmLen*sin(armAngleR);
+      float hxR = exR + lowerArmLen*cos(armAngleR+elbowAngleR);
+      float hyR = eyR + lowerArmLen*sin(armAngleR+elbowAngleR);
       // 「氵」ならボールを投げる
       if (selectedWeaponIdx[currentWeapon] != -1 && weaponCandidates[selectedWeaponIdx[currentWeapon]].equals("氵")) {
-        // 右手の先の座標を計算
-        float upperArmLen = 22;
-        float lowerArmLen = 18;
-        float armAngleR, elbowAngleR;
-        if (jumping) {
-          armAngleR = radians(-60);
-          elbowAngleR = radians(0);
-        } else if (attacking) {
-          armAngleR = radians(-10);
-          elbowAngleR = radians(10);
-        } else {
-          float swing = sin(walkAnim)*28;
-          armAngleR = radians(-1 + swing);
-          elbowAngleR = radians(40 + cos(walkAnim)*10);
-        }
-        float exR = playerX + upperArmLen*cos(armAngleR);
-        float eyR = playerY + upperArmLen*sin(armAngleR);
-        float hxR = exR + lowerArmLen*cos(armAngleR+elbowAngleR);
-        float hyR = eyR + lowerArmLen*sin(armAngleR+elbowAngleR);
-        // 投げる方向（右向き）
         float speed = 12;
         float vx = speed * cos(armAngleR+elbowAngleR);
         float vy = speed * sin(armAngleR+elbowAngleR);
         balls.add(new Ball(hxR, hyR, vx, vy));
+      }
+      // 「7」ならビームを発射
+      if (selectedWeaponIdx[currentWeapon] != -1 && weaponCandidates[selectedWeaponIdx[currentWeapon]].equals("7")) {
+        beamActive = true;
+        beamFrame = 0;
+        beamStartX = hxR;
+        beamStartY = hyR;
+        beamAngle = armAngleR + elbowAngleR;
       }
     }
   }
